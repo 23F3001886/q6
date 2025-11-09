@@ -1,0 +1,35 @@
+name: Matrix Build with Artifacts
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [16, 18, 20]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: matrix-e46f489
+        run: echo "Building for Node ${{ matrix.node }}"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Generate build artifact
+        run: |
+          echo "Build output for Node ${{ matrix.node }} on $(uname -s) $(uname -m)" > output-node${{ matrix.node }}.txt
+          node -v >> output-node${{ matrix.node }}.txt
+          npm -v >> output-node${{ matrix.node }}.txt
+          test -s output-node${{ matrix.node }}.txt
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-e46f489-node${{ matrix.node }}
+          path: output-node${{ matrix.node }}.txt
